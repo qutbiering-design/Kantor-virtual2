@@ -1,74 +1,75 @@
 import streamlit as st
 import google.generativeai as genai
 
+# Konfigurasi Halaman
 st.set_page_config(
-    page_title="Kantor Virtual - AI Personas",
+    page_title="Kantor Virtual AI",
         page_icon="🏢",
             layout="wide"
             )
 
-            st.sidebar.title("🔐 Konfigurasi")
-            api_key = st.sidebar.text_input("Masukkan Google Gemini API Key:", type="password")
+            # Sidebar untuk Pengaturan API Key dan Persona
+            st.sidebar.title("🏢 Kantor Virtual AI")
+            st.sidebar.markdown("---")
+
+            api_key = st.sidebar.text_input("Masukkan Google Gemini API Key Anda", type="password")
 
             if not api_key:
-                st.warning("Silakan masukkan Google Gemini API Key Anda di sidebar sebelah kiri untuk mulai menggunakan Kantor Virtual.")
-                    
-                        st.title("🏢 Selamat Datang di Kantor Virtual AI")
-                            st.markdown("""
-                                Aplikasi ini mensimulasikan lingkungan kantor profesional yang ditenagai oleh **Google Gemini API**. 
-                                    Anda dapat berkonsultasi dengan tiga persona AI yang memiliki keahlian berbeda:
-                                        
-                                            1. **Kang Roni** - Pakar Keuangan & Akuntansi
-                                                2. **Bu Rina** - Ahli SDM & Manajemen Operasional
-                                                    3. **Dodit** - Konsultan Kreatif & Pemasaran
-                                                        """)
-                                                        else:
-                                                            genai.configure(api_key=api_key)
-                                                                
-                                                                    st.sidebar.title("👥 Pilih Rekan Kerja")
-                                                                        persona = st.sidebar.selectbox(
-                                                                                "Konsultasi dengan:",
-                                                                                        ["Kang Roni (Keuangan)", "Bu Rina (SDM & Operasional)", "Dodit (Kreatif & Pemasaran)"]
-                                                                                            )
-                                                                                                
-                                                                                                    if "Kang Roni" in persona:
-                                                                                                            role_desc = "Anda adalah Kang Roni, seorang manajer keuangan dan akuntansi yang berpengalaman, tegas dalam angka, teliti, namun ramah. Berikan saran keuangan, analisis anggaran, atau tips bisnis yang akurat."
-                                                                                                                    avatar = "📊"
-                                                                                                                        elif "Bu Rina" in persona:
-                                                                                                                                role_desc = "Anda adalah Bu Rina, seorang manajer HRD dan operasional kantor yang bijaksana, rapi, peduli pada kesejahteraan karyawan, serta ahli dalam penyusunan SOP dan manajemen konflik."
-                                                                                                                                        avatar = "👩‍💼"
-                                                                                                                                            else:
-                                                                                                                                                    role_desc = "Anda adalah Dodit, seorang staf kreatif dan marketing yang santai, penuh ide out-of-the-box, energik, dan selalu up-to-date dengan tren pemasaran digital masa kini."
-                                                                                                                                                            avatar = "💡"
-                                                                                                                                                                    
-                                                                                                                                                                        st.title(f"{avatar} Ruang Diskusi: {persona}")
-                                                                                                                                                                            st.markdown(f"Silakan ajukan pertanyaan atau topik diskusi terkait pekerjaan Anda kepada **{persona.split(' ')[0]}**.")
-                                                                                                                                                                                
-                                                                                                                                                                                    if "messages" not in st.session_state:
-                                                                                                                                                                                            st.session_state.messages = []
-                                                                                                                                                                                                    
-                                                                                                                                                                                                        for message in st.session_state.messages:
-                                                                                                                                                                                                                with st.chat_message(message["role"]):
-                                                                                                                                                                                                                            st.markdown(message["content"])
-                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                            if prompt := st.chat_input(f"Ketik pesan untuk {persona.split(' ')[0]}..."):
-                                                                                                                                                                                                                                                    st.session_state.messages.append({"role": "user", "content": prompt})
-                                                                                                                                                                                                                                                            with st.chat_message("user"):
-                                                                                                                                                                                                                                                                        st.markdown(prompt)
-                                                                                                                                                                                                                                                                                    
-                                                                                                                                                                                                                                                                                            try:
-                                                                                                                                                                                                                                                                                                        model = genai.GenerativeModel(
-                                                                                                                                                                                                                                                                                                                        model_name="gemini-1.5-flash",
-                                                                                                                                                                                                                                                                                                                                        system_instruction=role_desc
-                                                                                                                                                                                                                                                                                                                                                    )
-                                                                                                                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                                                                                            with st.chat_message("assistant"):
-                                                                                                                                                                                                                                                                                                                                                                                            with st.spinner(f"{persona.split(' ')[0]} sedang merespons..."):
-                                                                                                                                                                                                                                                                                                                                                                                                                response = model.generate_content(prompt)
-                                                                                                                                                                                                                                                                                                                                                                                                                                    bot_reply = response.text
-                                                                                                                                                                                                                                                                                                                                                                                                                                                        st.markdown(bot_reply)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        st.session_state.messages.append({"role": "assistant", "content": bot_reply})
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                except Exception as e:
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            st.error(f"Terjadi kesalahan saat menghubungi Gemini API: {e}")
-                                                                                                                                                                                                                                                                                                                                                                                                                
+                st.warning("⚠️ Silakan masukkan API Key Google Gemini Anda di sidebar sebelah kiri untuk mulai menggunakan Kantor Virtual AI.")
+                    st.info("💡 Belum punya API Key? Anda bisa mendapatkannya secara gratis melalui Google AI Studio.")
+                        st.stop()
+
+                        # Konfigurasi Gemini API
+                        genai.configure(api_key=api_key)
+                        model = genai.GenerativeModel('gemini-1.5-flash')
+
+                        st.sidebar.markdown("---")
+                        selected_persona = st.sidebar.selectbox(
+                            "Pilih Persona Konsultasi:",
+                                ["Kang Roni (Pakar Keuangan & Akuntansi)", "Bu Rina (Ahli SDM & Manajemen Operasional)", "Dodit (Pemasaran Kreatif & Pengembangan Bisnis)"]
+                                )
+
+                                st.sidebar.markdown("---")
+                                st.sidebar.info("Aplikasi Kantor Virtual ini siap membantu mendiskusikan berbagai strategi bisnis Anda.")
+
+                                # Tampilan Utama
+                                st.title("🏢 Selamat Datang di Kantor Virtual AI")
+                                st.markdown(f"Anda sedang berkonsultasi di ruang kerja virtual dengan **{selected_persona}**.")
+
+                                # Inisialisasi Riwayat Chat
+                                if "messages" not in st.session_state:
+                                    st.session_state.messages = []
+
+                                    # Tampilkan Pesan Sebelumnya
+                                    for message in st.session_state.messages:
+                                        with st.chat_message(message["role"]):
+                                                st.markdown(message["content"])
+
+                                                # Input Pesan dari User
+                                                if prompt := st.chat_input("Ketik pesan atau pertanyaan Anda di sini..."):
+                                                    st.session_state.messages.append({"role": "user", "content": prompt})
+                                                        with st.chat_message("user"):
+                                                                st.markdown(prompt)
+
+                                                                    # Tentukan System Instruction Berdasarkan Persona yang Dipilih
+                                                                        if "Kang Roni" in selected_persona:
+                                                                                system_prompt = "Anda adalah Kang Roni, seorang pakar keuangan dan akuntansi yang cerdas, teliti, konservatif, namun suportif dalam memberikan analisis finansial dan pengelolaan anggaran bisnis."
+                                                                                    elif "Bu Rina" in selected_persona:
+                                                                                            system_prompt = "Anda adalah Bu Rina, seorang ahli Sumber Daya Manusia (SDM) dan manajemen operasional yang bijaksana, tegas, profesional, serta fokus pada efisiensi kerja dan kenyamanan karyawan."
+                                                                                                else:
+                                                                                                        system_prompt = "Anda adalah Dodit, seorang spesialis pemasaran kreatif dan pengembangan bisnis yang energik, penuh ide out-of-the-box, dinamis, dan berorientasi pada pertumbuhan omzet."
+
+                                                                                                            # Generate Respon dari Gemini
+                                                                                                                with st.chat_message("assistant"):
+                                                                                                                        message_placeholder = st.empty()
+                                                                                                                                message_placeholder.markdown("Sedang berpikir...")
+                                                                                                                                        try:
+                                                                                                                                                    full_prompt = f"{system_prompt}\n\nPertanyaan/Pesan Klien: {prompt}"
+                                                                                                                                                                response = model.generate_content(full_prompt)
+                                                                                                                                                                            reply = response.text
+                                                                                                                                                                                        message_placeholder.markdown(reply)
+                                                                                                                                                                                                    st.session_state.messages.append({"role": "assistant", "content": reply})
+                                                                                                                                                                                                            except Exception as e:
+                                                                                                                                                                                                                        error_msg = f"Terjadi kesalahan saat memproses permintaan: {e}"
+                                                                                                                                                                                                                                    message_placeholder.markdown(error_msg)
+                                                                                                                                                                                                                                    
