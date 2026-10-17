@@ -1,151 +1,74 @@
 import streamlit as st
-import pandas as pd
-import math
-from pathlib import Path
+import google.generativeai as genai
 
-# Set the title and favicon that appear in the Browser's tab bar.
 st.set_page_config(
-    page_title='GDP dashboard',
-    page_icon=':earth_americas:', # This is an emoji shortcode. Could be a URL too.
-)
+    page_title="Kantor Virtual - AI Personas",
+        page_icon="🏢",
+            layout="wide"
+            )
 
-# -----------------------------------------------------------------------------
-# Declare some useful functions.
+            st.sidebar.title("🔐 Konfigurasi")
+            api_key = st.sidebar.text_input("Masukkan Google Gemini API Key:", type="password")
 
-@st.cache_data
-def get_gdp_data():
-    """Grab GDP data from a CSV file.
-
-    This uses caching to avoid having to read the file every time. If we were
-    reading from an HTTP endpoint instead of a file, it's a good idea to set
-    a maximum age to the cache with the TTL argument: @st.cache_data(ttl='1d')
-    """
-
-    # Instead of a CSV on disk, you could read from an HTTP endpoint here too.
-    DATA_FILENAME = Path(__file__).parent/'data/gdp_data.csv'
-    raw_gdp_df = pd.read_csv(DATA_FILENAME)
-
-    MIN_YEAR = 1960
-    MAX_YEAR = 2022
-
-    # The data above has columns like:
-    # - Country Name
-    # - Country Code
-    # - [Stuff I don't care about]
-    # - GDP for 1960
-    # - GDP for 1961
-    # - GDP for 1962
-    # - ...
-    # - GDP for 2022
-    #
-    # ...but I want this instead:
-    # - Country Name
-    # - Country Code
-    # - Year
-    # - GDP
-    #
-    # So let's pivot all those year-columns into two: Year and GDP
-    gdp_df = raw_gdp_df.melt(
-        ['Country Code'],
-        [str(x) for x in range(MIN_YEAR, MAX_YEAR + 1)],
-        'Year',
-        'GDP',
-    )
-
-    # Convert years from string to integers
-    gdp_df['Year'] = pd.to_numeric(gdp_df['Year'])
-
-    return gdp_df
-
-gdp_df = get_gdp_data()
-
-# -----------------------------------------------------------------------------
-# Draw the actual page
-
-# Set the title that appears at the top of the page.
-'''
-# :earth_americas: GDP dashboard
-
-Browse GDP data from the [World Bank Open Data](https://data.worldbank.org/) website. As you'll
-notice, the data only goes to 2022 right now, and datapoints for certain years are often missing.
-But it's otherwise a great (and did I mention _free_?) source of data.
-'''
-
-# Add some spacing
-''
-''
-
-min_value = gdp_df['Year'].min()
-max_value = gdp_df['Year'].max()
-
-from_year, to_year = st.slider(
-    'Which years are you interested in?',
-    min_value=min_value,
-    max_value=max_value,
-    value=[min_value, max_value])
-
-countries = gdp_df['Country Code'].unique()
-
-if not len(countries):
-    st.warning("Select at least one country")
-
-selected_countries = st.multiselect(
-    'Which countries would you like to view?',
-    countries,
-    ['DEU', 'FRA', 'GBR', 'BRA', 'MEX', 'JPN'])
-
-''
-''
-''
-
-# Filter the data
-filtered_gdp_df = gdp_df[
-    (gdp_df['Country Code'].isin(selected_countries))
-    & (gdp_df['Year'] <= to_year)
-    & (from_year <= gdp_df['Year'])
-]
-
-st.header('GDP over time', divider='gray')
-
-''
-
-st.line_chart(
-    filtered_gdp_df,
-    x='Year',
-    y='GDP',
-    color='Country Code',
-)
-
-''
-''
-
-
-first_year = gdp_df[gdp_df['Year'] == from_year]
-last_year = gdp_df[gdp_df['Year'] == to_year]
-
-st.header(f'GDP in {to_year}', divider='gray')
-
-''
-
-cols = st.columns(4)
-
-for i, country in enumerate(selected_countries):
-    col = cols[i % len(cols)]
-
-    with col:
-        first_gdp = first_year[first_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
-        last_gdp = last_year[last_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
-
-        if math.isnan(first_gdp):
-            growth = 'n/a'
-            delta_color = 'off'
-        else:
-            growth = f'{last_gdp / first_gdp:,.2f}x'
-            delta_color = 'normal'
-
-        st.metric(
-            label=f'{country} GDP',
-            value=f'{last_gdp:,.0f}B',
-            delta=growth,
-            delta_color=delta_color
-        )
+            if not api_key:
+                st.warning("Silakan masukkan Google Gemini API Key Anda di sidebar sebelah kiri untuk mulai menggunakan Kantor Virtual.")
+                    
+                        st.title("🏢 Selamat Datang di Kantor Virtual AI")
+                            st.markdown("""
+                                Aplikasi ini mensimulasikan lingkungan kantor profesional yang ditenagai oleh **Google Gemini API**. 
+                                    Anda dapat berkonsultasi dengan tiga persona AI yang memiliki keahlian berbeda:
+                                        
+                                            1. **Kang Roni** - Pakar Keuangan & Akuntansi
+                                                2. **Bu Rina** - Ahli SDM & Manajemen Operasional
+                                                    3. **Dodit** - Konsultan Kreatif & Pemasaran
+                                                        """)
+                                                        else:
+                                                            genai.configure(api_key=api_key)
+                                                                
+                                                                    st.sidebar.title("👥 Pilih Rekan Kerja")
+                                                                        persona = st.sidebar.selectbox(
+                                                                                "Konsultasi dengan:",
+                                                                                        ["Kang Roni (Keuangan)", "Bu Rina (SDM & Operasional)", "Dodit (Kreatif & Pemasaran)"]
+                                                                                            )
+                                                                                                
+                                                                                                    if "Kang Roni" in persona:
+                                                                                                            role_desc = "Anda adalah Kang Roni, seorang manajer keuangan dan akuntansi yang berpengalaman, tegas dalam angka, teliti, namun ramah. Berikan saran keuangan, analisis anggaran, atau tips bisnis yang akurat."
+                                                                                                                    avatar = "📊"
+                                                                                                                        elif "Bu Rina" in persona:
+                                                                                                                                role_desc = "Anda adalah Bu Rina, seorang manajer HRD dan operasional kantor yang bijaksana, rapi, peduli pada kesejahteraan karyawan, serta ahli dalam penyusunan SOP dan manajemen konflik."
+                                                                                                                                        avatar = "👩‍💼"
+                                                                                                                                            else:
+                                                                                                                                                    role_desc = "Anda adalah Dodit, seorang staf kreatif dan marketing yang santai, penuh ide out-of-the-box, energik, dan selalu up-to-date dengan tren pemasaran digital masa kini."
+                                                                                                                                                            avatar = "💡"
+                                                                                                                                                                    
+                                                                                                                                                                        st.title(f"{avatar} Ruang Diskusi: {persona}")
+                                                                                                                                                                            st.markdown(f"Silakan ajukan pertanyaan atau topik diskusi terkait pekerjaan Anda kepada **{persona.split(' ')[0]}**.")
+                                                                                                                                                                                
+                                                                                                                                                                                    if "messages" not in st.session_state:
+                                                                                                                                                                                            st.session_state.messages = []
+                                                                                                                                                                                                    
+                                                                                                                                                                                                        for message in st.session_state.messages:
+                                                                                                                                                                                                                with st.chat_message(message["role"]):
+                                                                                                                                                                                                                            st.markdown(message["content"])
+                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                            if prompt := st.chat_input(f"Ketik pesan untuk {persona.split(' ')[0]}..."):
+                                                                                                                                                                                                                                                    st.session_state.messages.append({"role": "user", "content": prompt})
+                                                                                                                                                                                                                                                            with st.chat_message("user"):
+                                                                                                                                                                                                                                                                        st.markdown(prompt)
+                                                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                            try:
+                                                                                                                                                                                                                                                                                                        model = genai.GenerativeModel(
+                                                                                                                                                                                                                                                                                                                        model_name="gemini-1.5-flash",
+                                                                                                                                                                                                                                                                                                                                        system_instruction=role_desc
+                                                                                                                                                                                                                                                                                                                                                    )
+                                                                                                                                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                                                                                            with st.chat_message("assistant"):
+                                                                                                                                                                                                                                                                                                                                                                                            with st.spinner(f"{persona.split(' ')[0]} sedang merespons..."):
+                                                                                                                                                                                                                                                                                                                                                                                                                response = model.generate_content(prompt)
+                                                                                                                                                                                                                                                                                                                                                                                                                                    bot_reply = response.text
+                                                                                                                                                                                                                                                                                                                                                                                                                                                        st.markdown(bot_reply)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                except Exception as e:
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            st.error(f"Terjadi kesalahan saat menghubungi Gemini API: {e}")
+                                                                                                                                                                                                                                                                                                                                                                                                                
